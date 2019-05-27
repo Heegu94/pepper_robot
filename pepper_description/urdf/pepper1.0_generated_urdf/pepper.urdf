@@ -1931,7 +1931,7 @@
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
   <gazebo reference="WheelFL_link">
-    <mu1>1</mu1>
+    <mu1>0.2</mu1>
     <mu2>0</mu2>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
@@ -1940,8 +1940,8 @@
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
   <gazebo reference="WheelB_link">
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
     <fdir1 value="1 0 0"/>
@@ -1950,7 +1950,7 @@
   </gazebo>
   <gazebo reference="WheelFR_link">
     <mu1>0</mu1>
-    <mu2>1</mu2>
+    <mu2>0.2</mu2>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
     <fdir1 value="0 1 0"/>
@@ -2312,21 +2312,137 @@
     </sensor>
   </gazebo>
   <!-- Drive controller -->
+  <!--Original drive controller from Aldebaran-->
+  <!--<gazebo>
+      <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>100</updateRate>
+        <robotNamespace>/</robotNamespace>
+        <leftJoint>WheelFL</leftJoint>
+        <rightJoint>WheelFR</rightJoint>
+        <wheelSeparation>0.170</wheelSeparation>
+        <wheelDiameter>0.140</wheelDiameter>
+        <torque>36.9</torque>
+        <commandTopic>cmd_vel</commandTopic>
+        <odometryTopic>odom_diffdrive</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <robotBaseFrame>base_footprint</robotBaseFrame>
+      </plugin>
+    </gazebo>
+-->
+  <!-- Custom base plugin Documentation at https://github.com/tu-darmstadt-ros-pkg/hector_gazebo/blob/indigo-devel/hector_gazebo_plugins/src/gazebo_ros_force_based_move.cpp -->
   <gazebo>
-    <plugin filename="libgazebo_ros_diff_drive.so" name="differential_drive_controller">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>100</updateRate>
-      <robotNamespace>/</robotNamespace>
-      <leftJoint>WheelFL</leftJoint>
-      <rightJoint>WheelFR</rightJoint>
-      <wheelSeparation>0.170</wheelSeparation>
-      <wheelDiameter>0.140</wheelDiameter>
-      <torque>36.9</torque>
+    <plugin filename="libpepper_gazebo_ros_force_omni_base.so" name="base_drive_controller">
+      <robotNamespace>/pepper_robot</robotNamespace>
       <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>odom_diffdrive</odometryTopic>
+      <odometryTopic>odom</odometryTopic>
+      <publishOdometryTf>true</publishOdometryTf>
       <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>base_footprint</robotBaseFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>Tibia</robotBaseFrame>
+      <yaw_velocity_p_gain>500.0</yaw_velocity_p_gain>
+      <yaw_velocity_i_gain>300.0</yaw_velocity_i_gain>
+      <x_velocity_p_gain>1000.0</x_velocity_p_gain>
+      <x_velocity_i_gain>300.0</x_velocity_i_gain>
+      <y_velocity_p_gain>1000.0</y_velocity_p_gain>
+      <y_velocity_i_gain>300.0</y_velocity_i_gain>
+      <max_torque>8.0</max_torque>
+      <max_force>50.0</max_force>
     </plugin>
+  </gazebo>
+  <!-- Lasers sensors -->
+  <gazebo reference="SurroundingRightLaser_device_frame">
+    <sensor name="laser_sensor_right" type="ray">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>15</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.515</min_angle>
+            <max_angle>0.515</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>1.5</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin filename="libgazebo_ros_laser.so" name="gazebo_ros_laser_sensor_right_plugin">
+        <topicName>/pepper_robot/laser/right</topicName>
+        <frameName>SurroundingRightLaser_device_frame</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="SurroundingLeftLaser_device_frame">
+    <sensor name="laser_sensor_left" type="ray">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>15</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.515</min_angle>
+            <max_angle>0.515</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>1.5</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin filename="libgazebo_ros_laser.so" name="gazebo_ros_laser_sensor_left_plugin">
+        <topicName>/pepper_robot/laser/left</topicName>
+        <frameName>SurroundingLeftLaser_device_frame</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+  <gazebo reference="SurroundingFrontLaser_device_frame">
+    <sensor name="laser_sensor_front" type="ray">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>15</samples>
+            <resolution>1</resolution>
+            <min_angle>-0.515</min_angle>
+            <max_angle>0.515</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>1.5</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin filename="libgazebo_ros_laser.so" name="gazebo_ros_laser_sensor_front_plugin">
+        <topicName>/pepper_robot/laser/front</topicName>
+        <frameName>SurroundingFrontLaser_device_frame</frameName>
+      </plugin>
+    </sensor>
   </gazebo>
   <!-- HEAD -->
   <transmission name="HeadYaw_Transmission">
